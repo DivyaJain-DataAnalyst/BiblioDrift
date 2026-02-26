@@ -233,6 +233,22 @@ const SAMPLE_BOOKS = {
         { name: 'CodeMaster', rating: 5, text: 'A must-read for anyone serious about improving focus and output.' },
         { name: 'SilentAchiever', rating: 4, text: 'Great framework for eliminating distractions and building deep concentration.' }
     ]
+},
+{
+    id: 'sample-15',
+    title: 'The Psychology of Money',
+    author: 'Morgan Housel',
+    cover: 'https://covers.openlibrary.org/b/id/10521270-M.jpg',
+    rating: 4.7,
+    ratingCount: 11234,
+    description: 'An insightful exploration of how people think about money and the behaviors that influence financial decisions. Morgan Housel shares timeless lessons on wealth, greed, and happiness through engaging real-world stories.',
+    categories: ['Finance', 'Self-Development', 'Investing'],
+    spineColor: '#8B4513',
+    textColor: '#FFFFFF',
+    reviews: [
+        { name: 'SmartInvestor', rating: 5, text: 'A refreshing perspective on wealth and financial behavior.' },
+        { name: 'WealthBuilder', rating: 4, text: 'Simple yet powerful lessons that change how you view money.' }
+    ]
 }
     ]
 };
