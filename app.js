@@ -151,6 +151,7 @@ class BookRenderer {
                     <div class="book-actions">
                         <button class="btn-icon add-btn" title="Add to Library"><i class="fa-regular fa-heart"></i></button>
                         <button class="btn-icon info-btn" title="Read Details"><i class="fa-solid fa-info"></i></button>
+                        <button class="btn-icon share-btn" title="Share Book"><i class="fa-solid fa-share-nodes"></i></button>
                         <button class="btn-icon" title="Flip Back" onclick="event.stopPropagation(); this.closest('.book').classList.remove('flipped'); const s = new Audio('assets/sounds/page-flip.mp3'); s.volume=0.5; s.play();"><i class="fa-solid fa-rotate-left"></i></button>
                     </div>
                 </div>
@@ -192,6 +193,18 @@ class BookRenderer {
         scene.querySelector('.info-btn').addEventListener('click', (e) => {
             e.stopPropagation();
             this.openModal(bookData);
+        });
+
+        // Share Button
+        scene.querySelector('.share-btn').addEventListener('click', (e) => {
+            e.stopPropagation();
+            const shareText = `Check out this book: ${title} by ${authors}`;
+            navigator.clipboard.writeText(shareText).then(() => {
+                showToast('Book details copied to clipboard!', 'success');
+            }).catch(err => {
+                console.error('Failed to copy text: ', err);
+                showToast('Failed to copy book details.', 'error');
+            });
         });
 
         // Async fetch AI Vibe - Hydrate the UI
@@ -270,6 +283,19 @@ class BookRenderer {
         document.getElementById('modal-title').textContent = book.volumeInfo.title;
         document.getElementById('modal-author').textContent = book.volumeInfo.authors?.join(", ") || "Unknown Author";
         document.getElementById('modal-summary').textContent = book.volumeInfo.description || "No description available.";
+
+        const shareBtn = document.getElementById('modal-share-btn');
+        if (shareBtn) {
+            shareBtn.onclick = () => {
+                const shareText = `Check out this book: ${book.volumeInfo.title} by ${book.volumeInfo.authors?.join(", ") || "Unknown Author"}`;
+                navigator.clipboard.writeText(shareText).then(() => {
+                    showToast('Book title and author copied!', 'success');
+                }).catch(err => {
+                    console.error('Failed to copy text: ', err);
+                    showToast('Failed to copy book details.', 'error');
+                });
+            };
+        }
 
         modal.showModal();
         document.getElementById('closeModalBtn').onclick = () => modal.close();
