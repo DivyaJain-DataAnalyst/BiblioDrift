@@ -16,7 +16,7 @@
     <link
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
-      integrity="sha512-9usAa10IRO0HhonpyAIVpjrylPvoDwiPUiKdWk5t3PyolY1cOd4DSE0Ga+ri4AuTroPR5aQvXU9xC6qOPnzFeg=="
+      xintegrity="sha512-9usAa10IRO0HhonpyAIVpjrylPvoDwiPUiKdWk5t3PyolY1cOd4DSE0Ga+ri4AuTroPR5aQvXU9xC6qOPnzFeg=="
       crossorigin="anonymous"
       referrerpolicy="no-referrer"
     />
@@ -61,96 +61,82 @@
       </div>
     </header>
 
-    <main>
+    <main id="main-content">
       <section class="hero">
         <h1>Find yourself in the pages.</h1>
         <p>A curated sanctuary for those who read through emotions.</p>
       </section>
 
-      <!-- Curated Table 1 -->
-      <section class="curated-section">
+      <!-- SEARCH RESULTS SECTION (Initially Hidden) -->
+      <section id="search-results-section" class="curated-section" style="display: none;">
         <div class="section-header">
-          <h2>Rainy Evening Reads</h2>
-          <span
-            ><i class="fa-solid fa-cloud-rain"></i> Mystery & Melancholy</span
-          >
+          <h2 id="search-query-display">Search Results</h2>
+          <span><i class="fa-solid fa-magnifying-glass"></i> Exploring your query</span>
         </div>
-
-        <div class="curated-row" id="row-rainy">
-          <!-- Books injected by JS -->
-          <!-- Hardcoded example for structure reference during dev -->
-          <div class="book-scene">
-            <div class="book">
-              <div class="book__face book__face--front">
-                <img
-                  src="https://books.google.com/books/content?id=uyr0DwAAQBAJ&printsec=frontcover&img=1&zoom=1&edge=curl&source=gbs_api"
-                  alt="Cover"
-                />
-              </div>
-              <div class="book__face book__face--spine"></div>
-              <div class="book__face book_face--right"></div>
-              <div class="book__face book__face--back">
-                <div class="handwritten-note">
-                  "A quiet storm of a book. Best read with a blanket."
-                </div>
-                <div class="book-actions">
-                  <button class="btn-icon" title="Add to Library">
-                    <i class="fa-regular fa-heart"></i>
-                  </button>
-                  <button class="btn-icon" title="Read Details">
-                    <i class="fa-solid fa-info"></i>
-                  </button>
-                </div>
-              </div>
+        <div class="curated-row" id="search-results-grid">
+          <!-- Dynamically Appended Books -->
+        </div>
+        
+        <!-- INFINITE SCROLL SENTINEL & SPINNER -->
+        <div id="infinite-scroll-sentinel" class="infinite-scroll-container">
+            <div class="loading-spinner">
+                <i class="fa-solid fa-spinner fa-spin"></i> Loading more books...
             </div>
-          </div>
         </div>
       </section>
 
-      <!-- Curated Table 2 -->
-      <section class="curated-section">
-        <div class="section-header">
-          <h2>Indian Authors</h2>
-          <span
-            ><i class="fa-solid fa-feather"></i> Voices from the
-            Subcontinent</span
-          >
-        </div>
-        <div class="curated-row" id="row-indian">
-          <!-- JS will fill this -->
-        </div>
-      </section>
+      <!-- CURATED LANDING CONTENT -->
+      <div id="landing-content">
+          <!-- Curated Table 1 -->
+          <section class="curated-section">
+            <div class="section-header">
+              <h2>Rainy Evening Reads</h2>
+              <span><i class="fa-solid fa-cloud-rain"></i> Mystery & Melancholy</span>
+            </div>
+            <div class="curated-row" id="row-rainy">
+              <!-- Books injected by JS -->
+            </div>
+          </section>
 
-      <!-- Curated Table 3 -->
-      <section class="curated-section">
-        <div class="section-header">
-          <h2>Forgotten Classics</h2>
-          <span
-            ><i class="fa-solid fa-hourglass"></i> Timeless & Dust-free</span
-          >
-        </div>
-        <div class="curated-row" id="row-classics">
-          <!-- JS will fill this -->
-        </div>
-      </section>
+          <!-- Curated Table 2 -->
+          <section class="curated-section">
+            <div class="section-header">
+              <h2>Indian Authors</h2>
+              <span><i class="fa-solid fa-feather"></i> Voices from the Subcontinent</span>
+            </div>
+            <div class="curated-row" id="row-indian">
+              <!-- JS will fill this -->
+            </div>
+          </section>
 
-      <!-- Curated Table 4 -->
-      <section class="curated-section">
-        <div class="section-header">
-          <h2>By Genre</h2>
-          <span><i class="fa-solid fa-tag"></i> Explore by Category</span>
-        </div>
-        <div class="curated-row" id="row-genre">
-          <!-- JS will fill this -->
-        </div>
-      </section>
+          <!-- Curated Table 3 -->
+          <section class="curated-section">
+            <div class="section-header">
+              <h2>Forgotten Classics</h2>
+              <span><i class="fa-solid fa-hourglass"></i> Timeless & Dust-free</span>
+            </div>
+            <div class="curated-row" id="row-classics">
+              <!-- JS will fill this -->
+            </div>
+          </section>
 
+          <!-- Curated Table 4 -->
+          <section class="curated-section">
+            <div class="section-header">
+              <h2>By Genre</h2>
+              <span><i class="fa-solid fa-tag"></i> Explore by Category</span>
+            </div>
+            <div class="curated-row" id="row-genre">
+              <!-- JS will fill this -->
+            </div>
+          </section>
+      </div>
     </main>
 
     <button id="backToTop" class="btn-icon back-to-top" title="Back to Top">
       <i class="fa-solid fa-arrow-up"></i>
     </button>
-    <!--Footer for social media icons -->
+
     <footer class="footer">
       <div class="social_icons">
         <a href="#"><i class="fab fa-linkedin"></i></a>
@@ -196,5 +182,35 @@
 
     <script src="app.js"></script>
     <script src="script/header-scroll.js"></script>
+    
+    <style>
+      /* Style for the Infinite Scroll Sentinel */
+      .infinite-scroll-container {
+          width: 100%;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          padding: 40px 0;
+          opacity: 0; /* Hidden until triggered */
+          transition: opacity 0.3s ease;
+      }
+      .infinite-scroll-container.active {
+          opacity: 1;
+      }
+      .loading-spinner {
+          font-family: 'Georgia', serif;
+          font-style: italic;
+          color: var(--text-muted);
+          display: flex;
+          gap: 10px;
+          align-items: center;
+      }
+      #search-results-grid {
+          display: flex;
+          flex-wrap: wrap;
+          gap: 20px;
+          justify-content: center;
+      }
+    </style>
   </body>
 </html>

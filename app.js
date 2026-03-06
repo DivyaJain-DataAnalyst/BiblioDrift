@@ -1,33 +1,22 @@
 /**
  * Library Application Core Logic
- * * This file contains the LibraryManager and ThemeManager classes.
- * It has been updated to safely handle QuotaExceededError when 
- * interacting with localStorage.
+ * - Implements SafeStorage for QuotaExceededError handling
+ * - Implements ThemeManager with persistence
+ * - Implements DiscoveryManager for Infinite Scroll
  */
 
-// Global Utility for UI feedback (referenced in the bug report)
+// --- UTILITIES ---
 function showToast(message, type = "info") {
     console.log(`[Toast ${type.toUpperCase()}]: ${message}`);
-    // implementation would normally render a UI element
+    // In a full implementation, this would trigger a UI notification component
 }
 
-/**
- * Robust Wrapper for LocalStorage
- * Prevents application crashes when the 5MB quota is exceeded.
- */
 const SafeStorage = {
-    /**
-     * Attempts to save data to localStorage with error handling.
-     * @param {string} key 
-     * @param {string} value 
-     * @returns {boolean} Success status
-     */
     set(key, value) {
         try {
             localStorage.setItem(key, value);
             return true;
         } catch (error) {
-            // Check specifically for QuotaExceededError across different browsers
             const isQuotaError = 
                 error instanceof DOMException && (
                 error.code === 22 || 
@@ -37,16 +26,10 @@ const SafeStorage = {
 
             if (isQuotaError) {
                 showToast("Local storage full! Please sync to cloud and clear cache.", "error");
-            } else {
-                console.error("LocalStorage Error:", error);
             }
             return false;
         }
     },
-
-    /**
-     * Safely retrieves data from localStorage.
-     */
     get(key) {
         try {
             return localStorage.getItem(key);
@@ -56,69 +39,144 @@ const SafeStorage = {
     }
 };
 
+// --- THEME MANAGER ---
 class ThemeManager {
     constructor() {
         this.theme = SafeStorage.get('ui_theme') || 'light';
+        this.toggleBtn = document.getElementById('themeToggle');
+        this.init();
+    }
+
+    init() {
+        if (this.toggleBtn) {
+            this.toggleBtn.addEventListener('click', () => this.toggleTheme());
+        }
         this.applyTheme();
     }
 
     toggleTheme() {
         this.theme = this.theme === 'light' ? 'dark' : 'light';
-        // FIXED: Using SafeStorage instead of direct localStorage.setItem
         if (SafeStorage.set('ui_theme', this.theme)) {
             this.applyTheme();
         }
     }
 
     applyTheme() {
-        document.body.className = this.theme;
-        console.log(`Theme applied: ${this.theme}`);
+        // Toggle class on body for CSS targeting
+        document.body.classList.remove('light', 'dark');
+        document.body.classList.add(this.theme);
+        
+        // Update Icon
+        if (this.toggleBtn) {
+            const icon = this.toggleBtn.querySelector('i');
+            if (this.theme === 'dark') {
+                icon.className = 'fa-solid fa-sun';
+            } else {
+                icon.className = 'fa-solid fa-moon';
+            }
+        }
+        console.log(`Theme switched to: ${this.theme}`);
     }
 }
 
-class LibraryManager {
+// --- DISCOVERY & INFINITE SCROLL ---
+class DiscoveryManager {
     constructor() {
-        this.books = this.loadFromStorage();
-        this.authToken = SafeStorage.get('auth_token');
+        this.searchInput = document.getElementById('searchInput');
+        this.resultsGrid = document.getElementById('search-results-grid');
+        this.resultsSection = document.getElementById('search-results-section');
+        this.landingContent = document.getElementById('landing-content');
+        this.sentinel = document.getElementById('infinite-scroll-sentinel');
+        this.queryDisplay = document.getElementById('search-query-display');
+
+        this.currentQuery = "";
+        this.startIndex = 0;
+        this.isLoading = false;
+        this.hasMore = true;
+
+        this.init();
     }
 
-    loadFromStorage() {
-        const data = SafeStorage.get('library_cache');
-        return data ? JSON.parse(data) : [];
+    init() {
+        if (this.searchInput) {
+            this.searchInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') this.startNewSearch(e.target.value);
+            });
+        }
+
+        const observer = new IntersectionObserver((entries) => {
+            if (entries[0].isIntersecting && !this.isLoading && this.hasMore && this.currentQuery) {
+                this.fetchBooks();
+            }
+        }, { threshold: 0.1, rootMargin: '100px' });
+
+        if (this.sentinel) observer.observe(this.sentinel);
     }
 
-    /**
-     * Persists the library state locally.
-     * Updated to handle storage limits.
-     */
-    saveLocally() {
-        const serializedData = JSON.stringify(this.books);
-        // FIXED: Wrapped in SafeStorage to catch QuotaExceededError
-        SafeStorage.set('library_cache', serializedData);
+    startNewSearch(query) {
+        if (!query.trim()) return;
+        this.currentQuery = query;
+        this.startIndex = 0;
+        this.hasMore = true;
+        this.resultsGrid.innerHTML = "";
+        
+        // UI State Switch
+        this.landingContent.style.display = 'none';
+        this.resultsSection.style.display = 'block';
+        this.queryDisplay.innerText = `Search Results for "${query}"`;
+        
+        this.fetchBooks();
     }
 
-    addBook(book) {
-        this.books.push(book);
-        this.saveLocally();
-        showToast(`Added: ${book.title}`, "success");
+    async fetchBooks() {
+        if (this.isLoading) return;
+        this.isLoading = true;
+        this.sentinel.classList.add('active');
+
+        try {
+            const res = await fetch(`https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(this.currentQuery)}&startIndex=${this.startIndex}&maxResults=20`);
+            const data = await res.json();
+
+            if (data.items && data.items.length > 0) {
+                this.renderBooks(data.items);
+                this.startIndex += 20;
+            } else {
+                this.hasMore = false;
+            }
+        } catch (err) {
+            showToast("Error fetching books", "error");
+        } finally {
+            this.isLoading = false;
+            this.sentinel.classList.remove('active');
+        }
     }
 
-    updateAuthToken(token) {
-        this.authToken = token;
-        // FIXED: Securely attempt to store token
-        SafeStorage.set('auth_token', token);
-    }
-
-    clearCache() {
-        localStorage.removeItem('library_cache');
-        this.books = [];
-        showToast("Cache cleared.", "info");
+    renderBooks(books) {
+        books.forEach(book => {
+            const volume = book.volumeInfo;
+            const img = volume.imageLinks?.thumbnail || 'https://via.placeholder.com/128x192?text=No+Cover';
+            
+            // Simplified 3D book structure based on index.html design
+            const card = document.createElement('div');
+            card.className = 'book-scene';
+            card.innerHTML = `
+                <div class="book">
+                    <div class="book__face book__face--front">
+                        <img src="${img}" alt="Cover">
+                    </div>
+                    <div class="book__face book__face--spine"></div>
+                    <div class="book__face book__face--back">
+                        <div class="handwritten-note">${volume.title}</div>
+                    </div>
+                </div>
+            `;
+            this.resultsGrid.appendChild(card);
+        });
     }
 }
 
-// Initialization
-const themeManager = new ThemeManager();
-const library = new LibraryManager();
-
-// Example usage that might trigger the bug if quota is full:
-// library.addBook({ title: "My Large Journal", content: "..." });
+// --- INITIALIZATION ---
+window.addEventListener('DOMContentLoaded', () => {
+    new ThemeManager();
+    new DiscoveryManager();
+});
