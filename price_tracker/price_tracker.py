@@ -243,7 +243,7 @@ class PriceTracker:
             return False
             
         try:
-            from models import PriceHistory, db
+            from models import PriceHistory
             
             price_history = PriceHistory(
                 book_id=book_id,
