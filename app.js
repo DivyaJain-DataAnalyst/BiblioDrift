@@ -300,8 +300,11 @@ class BookRenderer {
         try {
             const keyParam = GOOGLE_API_KEY ? `&key=${GOOGLE_API_KEY}` : '';
             const encodedQuery = encodeURIComponent(query);
-            const res = await fetch(`${API_BASE}?q=${encodedQuery}&maxResults=${maxResults}&printType=books${keyParam}`);
-
+            
+            // Add pagination parameters
+            const startIndexParam = currentStartIndex > 0 ? `&startIndex=${currentStartIndex}` : '';
+            const res = await fetch(`${API_BASE}?q=${encodedQuery}&maxResults=${maxResults}${startIndexParam}${keyParam}`);
+            
             if (!res.ok) {
                 throw new Error(`API Error: ${res.statusText}`);
             }
@@ -309,7 +312,12 @@ class BookRenderer {
             const data = await res.json();
 
             if (data.items && data.items.length > 0) {
-                container.innerHTML = '';
+                // If this is a new search, clear container
+                if (currentStartIndex === 0) {
+                    container.innerHTML = '';
+                }
+                
+                // Append new books instead of clearing
                 for (const book of data.items) {
                     const bookElement = await this.createBookElement(book);
                     container.appendChild(bookElement);
@@ -321,6 +329,10 @@ class BookRenderer {
                         <p>No books found. The shelves are empty.</p>
                     </div>`;
             }
+            
+            // Check if we have more results
+            const hasMoreResults = data.items.length >= maxResults;
+            
         } catch (err) {
             console.error("Failed to fetch books", err);
             showToast("Failed to load bookshelf.", "error");
@@ -1472,8 +1484,16 @@ class BooksellerRecommends {
     }
 }
 
-// Initialize Bookseller Recommends when DOM is ready
-document.addEventListener('DOMContentLoaded', () => {
-    new BooksellerRecommends();
-});
+// Initialize keyboard shortcuts when DOM is ready
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', () => KeyboardShortcuts.init());
+} else {
+    KeyboardShortcuts.init();
+}
 
+// Infinite Scroll State Management
+let currentSearchQuery = '';
+let currentStartIndex = 0;
+const MAX_RESULTS = 20;
+let isFetching = false;
+let hasMoreResults = true;
