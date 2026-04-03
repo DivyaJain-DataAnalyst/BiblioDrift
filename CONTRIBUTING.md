@@ -80,7 +80,6 @@ When proposing an enhancement, describe:
 ## Notes on Documentation
 
 - The main project overview lives in [PROJECT_DETAILS.md](PROJECT_DETAILS.md).
-- This repository does not use a separate TUTORIAL.md file.
 - If you need to explain setup or workflows, update this file or the README.
 
 ## License
