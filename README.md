@@ -5,9 +5,9 @@
 
 BiblioDrift is a cozy, visual-first book discovery platform designed to make finding your next read feel like wandering through a warm, quiet bookstore rather than scrolling through a database.
 
-## ACM Sourcery Navigation
+## NSOC Navigation
 
-[![ACM Sourcery - Contributor Guide](https://img.shields.io/badge/ACM%20Sourcery-Contributor%20Guide-1D4ED8?style=for-the-badge)](PROJECT_DETAILS.md)
+[![Nexus Spring of Code- Contributor Guide](https://img.shields.io/badge/Nexus%20Spring%20Of%20Code-Contributor%20Guide-1D4ED8?style=for-the-badge)](PROJECT_DETAILS.md)
 
 ## 🌟 Core Philosophy
 - **"Zero UI Noise"**: No popups, no aggressive metrics. Just calm browsing.
